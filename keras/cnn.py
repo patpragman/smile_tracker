@@ -45,9 +45,9 @@ model = models.Sequential([
     # convolutional  starting size 48x48
     tf.keras.layers.Rescaling(1. / 255),  # size 45x45 inexplicably
 
-    layers.Conv2D(64, (3, 3), activation='relu', input_shape=(48, 48, 3), strides=2),
+    layers.Conv2D(64, (2, 2), activation='relu', input_shape=(48, 48, 3), strides=2),
     layers.Dropout(dropout_value),
-    layers.MaxPooling2D(2, strides=1),
+    layers.MaxPooling2D(2, strides=2),
 
     layers.Conv2D(128, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
@@ -86,5 +86,3 @@ test_loss, test_acc = model.evaluate(testing_images, verbose=2)
 print(test_loss, test_acc)
 
 send_message_over_text(f'test loss:  {test_loss} \n{test_acc}')
-send_message_over_text(str(history.history))
-
