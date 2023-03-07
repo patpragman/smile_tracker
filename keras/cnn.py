@@ -49,16 +49,16 @@ model = models.Sequential([
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=1),
 
+    layers.Conv2D(512, (2, 2), activation='relu', strides=2),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(512, (2, 2), activation='relu', strides=2),
+    layers.Dropout(dropout_value),
+
+
     layers.Conv2D(128, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
-
-    layers.Conv2D(128, (2, 2), activation='relu', strides=2),
-    layers.Dropout(dropout_value),
-
-
-    layers.Conv2D(128, (2, 2), activation='relu', strides=1),
-    layers.Dropout(dropout_value),
-    layers.MaxPooling2D(2, strides=2),
+    layers.MaxPooling2D(2, strides=1),
 
 
 
@@ -86,3 +86,5 @@ test_loss, test_acc = model.evaluate(testing_images, verbose=2)
 print(test_loss, test_acc)
 
 send_message_over_text(f'test loss:  {test_loss} \n{test_acc}')
+
+print(model.summary())
