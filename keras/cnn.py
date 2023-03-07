@@ -28,14 +28,14 @@ testing_images = tf.keras.preprocessing.image_dataset_from_directory(
 )
 
 my_callbacks = [
-    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=15),
+    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=5),
     tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
     tf.keras.callbacks.TensorBoard(log_dir='./logs'),
 ]
 
 filter_shape = (4, 4)
 filter_count = 32
-dropout_value = 0.18
+dropout_value = 0.45
 pooling_value = 4
 
 
@@ -48,42 +48,35 @@ model = models.Sequential([
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=1),
 
-    layers.Conv2D(64, (2, 2), activation='relu', strides=1),
+    layers.Conv2D(512, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
 
-    layers.Conv2D(64, (2, 2), activation='relu', strides=2),
+    layers.Conv2D(512, (2, 2), activation='relu', strides=2),
     layers.Dropout(dropout_value),
 
-    layers.Conv2D(64, (2, 2), activation='relu', strides=1),
+    layers.Conv2D(512, (2, 2), activation='relu', strides=1),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(512, (2, 2), activation='relu', strides=1),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(128, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=2),
 
     layers.Conv2D(64, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=2),
+
+
 
     # flat layers
     layers.Flatten(),
-    layers.Dense(100, activation="relu"),
-    layers.Dropout(dropout_value),
-
-    layers.Dense(100, activation="relu"),
-    layers.Dropout(dropout_value),
-
-    layers.Dense(100, activation="relu"),
-    layers.Dropout(dropout_value),
-
-    layers.Dense(100, activation="relu"),
-    layers.Dropout(dropout_value),
-
-    layers.Dense(100, activation="relu"),
-    layers.Dropout(dropout_value),
-
-    layers.Dense(100, activation="relu"),
+    layers.Dense(1024, activation="relu"),
     layers.Dropout(dropout_value),
 
 
-    layers.Dense(25, activation="relu"),
+    layers.Dense(1024, activation="relu"),
     layers.Dropout(dropout_value),
 
     layers.Dense(7, activation="relu"),
