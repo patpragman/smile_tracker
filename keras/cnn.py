@@ -49,7 +49,7 @@ model = models.Sequential([
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(3, strides=2),
 
-    layers.Conv2D(256, (2, 2), activation='relu', strides=1),
+    layers.Conv2D(256, (2, 2), activation='relu', strides=2),
     layers.Dropout(dropout_value),
 
     layers.Conv2D(128, (2, 2), activation='relu', strides=2),
