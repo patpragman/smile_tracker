@@ -16,6 +16,7 @@ train_images = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=batch_size,
     subset="training",
     validation_split=0.2,
+    color_mode='grayscale',
     seed=seed
 )
 
@@ -25,6 +26,7 @@ testing_images = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=batch_size,
     subset="validation",
     validation_split=0.2,
+    color_mode='grayscale',
     seed=seed
 )
 
@@ -45,7 +47,7 @@ model = models.Sequential([
     # convolutional  starting size 48x48
     tf.keras.layers.Rescaling(1. / 255),  # size 45x45 inexplicably
 
-    layers.Conv2D(64, (2, 2), activation='relu', input_shape=(48, 48, 3), strides=2),
+    layers.Conv2D(64, (2, 2), activation='relu', input_shape=(48, 48, 1), strides=2),
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=1),
 
