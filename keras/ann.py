@@ -8,7 +8,7 @@ from keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
 seed = 415
-batch_size = 256
+batch_size = 32
 dropout_value = 0.4
 
 train_images = tf.keras.preprocessing.image_dataset_from_directory(
@@ -37,6 +37,17 @@ my_callbacks = [
     #tf.keras.callbacks.TensorBoard(log_dir='./logs'),
 ]
 
+data_augmentation = tf.keras.Sequential([
+  layers.RandomFlip("horizontal_and_vertical"),
+  layers.RandomRotation(0.2),
+])
+
+IMG_SIZE = 48
+
+resize_and_rescale = tf.keras.Sequential([
+  layers.Resizing(IMG_SIZE, IMG_SIZE),
+  layers.Rescaling(1./255)
+])
 
 
 # build the model
@@ -44,6 +55,8 @@ model = models.Sequential([
     # convolutional  starting size 48x48
     tf.keras.layers.Rescaling(1. / 255),
 
+    resize_and_rescale,
+    data_augmentation,
 
     # flat layers
     layers.Flatten(),
@@ -53,6 +66,30 @@ model = models.Sequential([
 
 
     layers.Dense(48*48, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
     layers.Dropout(dropout_value),
     layers.BatchNormalization(),
 

@@ -33,29 +33,41 @@ testing_images = tf.keras.preprocessing.image_dataset_from_directory(
     seed=seed
 )
 
+data_augmentation = tf.keras.Sequential([
+  layers.RandomFlip("horizontal_and_vertical"),
+  layers.RandomRotation(0.2),
+])
+
+IMG_SIZE = 48
+
+resize_and_rescale = tf.keras.Sequential([
+  layers.Resizing(IMG_SIZE, IMG_SIZE),
+  layers.Rescaling(1./255)
+])
+
+
 my_callbacks = [
-    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=2),
+    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=7),
     tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
     #tf.keras.callbacks.TensorBoard(log_dir='./logs'),
 ]
 
-filter_shape = (4, 4)
-filter_count = 32
+
 dropout_value = 0.25
-pooling_value = 4
 
 
 # build the model
 model = models.Sequential([
     # convolutional  starting size 48x48
-    tf.keras.layers.Rescaling(1. / 255),  # size 45x45 inexplicably
+    resize_and_rescale,
+    data_augmentation,
 
     layers.Conv2D(64, (2, 2), activation='relu', input_shape=(48, 48, 1), strides=2),
     layers.Dropout(dropout_value),
     layers.MaxPooling2D(2, strides=1),
     layers.BatchNormalization(),
 
-    layers.Conv2D(512, (2, 2), activation='relu', strides=2),
+    layers.Conv2D(128, (2, 2), activation='relu', strides=2),
     layers.Dropout(dropout_value),
     layers.BatchNormalization(),
 
