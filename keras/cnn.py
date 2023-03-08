@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 seed = 415
-batch_size = 8
+batch_size = 32
 
 train_images = tf.keras.preprocessing.image_dataset_from_directory(
     "images",
@@ -71,10 +71,10 @@ model = models.Sequential([
 
     # flat layers
     layers.Flatten(),
+    layers.Dense(1152, activation='relu'),
 
-    layers.Dense(100, activation="relu"),
+    layers.Dense(26*26, activation="relu"),
     layers.Dropout(dropout_value),
-
 
     layers.Dense(6, activation="softmax")
 
