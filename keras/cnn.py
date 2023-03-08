@@ -35,7 +35,7 @@ testing_images = tf.keras.preprocessing.image_dataset_from_directory(
 
 data_augmentation = tf.keras.Sequential([
   layers.RandomFlip("horizontal_and_vertical"),
-  layers.RandomRotation(0.2),
+  layers.RandomRotation(0.3),
 ])
 
 IMG_SIZE = 48
@@ -71,7 +71,7 @@ model = models.Sequential([
     layers.Dropout(dropout_value),
     layers.BatchNormalization(),
 
-    layers.Conv2D(512, (2, 2), activation='relu', strides=2),
+    layers.Conv2D(1024, (2, 2), activation='relu', strides=1),
     layers.Dropout(dropout_value),
     layers.BatchNormalization(),
 
