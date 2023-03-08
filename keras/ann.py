@@ -1,61 +1,90 @@
 import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
+from notify import send_message_over_text
 
+from itertools import chain
 from keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
 seed = 415
+batch_size = 256
+dropout_value = 0.4
 
-train_images_loader = tf.keras.preprocessing.image_dataset_from_directory(
+train_images = tf.keras.preprocessing.image_dataset_from_directory(
     "images",
-    labels="inferred",
     image_size=(48, 48),
-    batch_size=256,
+    batch_size=batch_size,
     subset="training",
     validation_split=0.2,
+    color_mode='grayscale',
     seed=seed
 )
 
-testing_images_loader = tf.keras.preprocessing.image_dataset_from_directory(
+testing_images = tf.keras.preprocessing.image_dataset_from_directory(
     "images",
-    labels="inferred",
     image_size=(48, 48),
-    batch_size=64,
+    batch_size=batch_size,
     subset="validation",
     validation_split=0.2,
+    color_mode='grayscale',
     seed=seed
 )
 
 my_callbacks = [
-    tf.keras.callbacks.EarlyStopping(patience=5),
+    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=2),
     tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
-    tf.keras.callbacks.TensorBoard(log_dir='./logs'),
+    #tf.keras.callbacks.TensorBoard(log_dir='./logs'),
 ]
 
 
 
 # build the model
-model = keras.Sequential([
-    layers.Rescaling(1./255),
-    keras.layers.Dense(2304, activation='relu'),
-    layers.Dropout(.2),
-    keras.layers.Dense(2304, activation='relu'),
-    layers.Dropout(.2),
-    keras.layers.Dense(100, activation='relu'),
-    layers.Dropout(.2),
-    keras.layers.Dense(7, activation='softmax')
+model = models.Sequential([
+    # convolutional  starting size 48x48
+    tf.keras.layers.Rescaling(1. / 255),
+
+
+    # flat layers
+    layers.Flatten(),
+    layers.Dense(48*48, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+
+    layers.Dense(48*48, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(512, activation="relu"),
+    layers.Dropout(dropout_value),
+    layers.BatchNormalization(),
+
+    layers.Dense(6, activation="softmax")
+
 ])
 
 
-
 model.compile(optimizer='adam',
-              loss="categorical_crossentropy",
+              loss=keras.losses.SparseCategoricalCrossentropy(),
               metrics=['accuracy']
               )
 
-history = model.fit(train_images_loader, epochs=100,
-                    validation_data=testing_images_loader,
+history = model.fit(train_images, epochs=100,
+                    validation_data=testing_images,
                     callbacks=my_callbacks)
 
-test_loss, test_acc = model.evaluate(testing_images_loader, verbose=2)
+test_loss, test_acc = model.evaluate(testing_images, verbose=2)
+print(test_loss, test_acc)
+
+send_message_over_text(f'test loss:  {test_loss} \n{test_acc}')
+
+print(model.summary())

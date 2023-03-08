@@ -7,8 +7,11 @@ from itertools import chain
 from keras import datasets, layers, models
 import matplotlib.pyplot as plt
 
+# remove the disgusted images, because honestly it's not enough data
+
+
 seed = 415
-batch_size = 32
+batch_size = 8
 
 train_images = tf.keras.preprocessing.image_dataset_from_directory(
     "images",
@@ -65,12 +68,15 @@ model = models.Sequential([
     layers.MaxPooling2D(2, strides=1),
     layers.BatchNormalization(),
 
+
     # flat layers
     layers.Flatten(),
 
+    layers.Dense(100, activation="relu"),
+    layers.Dropout(dropout_value),
 
 
-    layers.Dense(7, activation="softmax")
+    layers.Dense(6, activation="softmax")
 
 ])
 
