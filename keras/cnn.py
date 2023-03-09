@@ -83,7 +83,7 @@ model = models.Sequential([
 
     # flat layers
     layers.Flatten(),
-    layers.Dense(676, activation='relu'),
+    layers.Dense(1152, activation='relu'),
 
     layers.Dense(26*26, activation="relu"),
     layers.Dropout(dropout_value),
