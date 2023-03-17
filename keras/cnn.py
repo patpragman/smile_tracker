@@ -103,8 +103,8 @@ model = models.Sequential([
     layers.BatchNormalization(),
     layers.Dropout(dropout_value),
 
-    layers.Conv2D(128, kernel_size=(3, 3), activation='relu'),
-    layers.MaxPooling2D(pool_size=(2, 2)),
+    layers.Conv2D(128, kernel_size=(4, 4), activation='relu'),
+    layers.MaxPooling2D(pool_size=(2, 2), padding="same"),
     layers.BatchNormalization(),
     layers.Dropout(dropout_value),
 
