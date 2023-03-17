@@ -5,7 +5,6 @@ from notify import send_message_over_text
 
 from itertools import chain
 from keras import datasets, layers, models
-import matplotlib.pyplot as plt
 
 # remove the disgusted images, because honestly it's not enough data
 
@@ -47,7 +46,7 @@ resize_and_rescale = tf.keras.Sequential([
 
 
 my_callbacks = [
-    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=7),
+    tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=15),
     tf.keras.callbacks.ModelCheckpoint(filepath='model.{epoch:02d}-{val_loss:.2f}.h5'),
     #tf.keras.callbacks.TensorBoard(log_dir='./logs'),
 ]
@@ -62,33 +61,62 @@ model = models.Sequential([
     resize_and_rescale,
     data_augmentation,
 
-    layers.Conv2D(64, (2, 2), activation='relu', input_shape=(48, 48, 1), strides=2),
-    layers.Dropout(dropout_value),
-    layers.MaxPooling2D(2, strides=1),
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(48, 48, 1), strides=2),
+    layers.MaxPooling2D(pool_size=(2, 2)),
     layers.BatchNormalization(),
-
-    layers.Conv2D(128, (2, 2), activation='relu', strides=2),
     layers.Dropout(dropout_value),
-    layers.BatchNormalization(),
 
-    layers.Conv2D(1024, (2, 2), activation='relu', strides=1),
+    layers.Conv2D(64, kernel_size=(3, 3), activation='relu', padding="same"),
+    layers.MaxPooling2D(pool_size=(2, 2)),
+    layers.BatchNormalization(),
     layers.Dropout(dropout_value),
-    layers.BatchNormalization(),
 
-    layers.Conv2D(512, (2, 2), activation='relu', strides=1),
+    layers.Conv2D(128, kernel_size=(3, 3), activation='relu', padding="same"),
+    layers.BatchNormalization(),
     layers.Dropout(dropout_value),
-    layers.MaxPooling2D(2, strides=1),
-    layers.BatchNormalization(),
 
+    layers.Conv2D(256, kernel_size=(3, 3), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(1024, kernel_size=(3, 3), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(2048, kernel_size=(2, 2), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(1024, kernel_size=(4, 4), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
+
+    layers.Conv2D(128, kernel_size=(3, 3), activation='relu'),
+    layers.MaxPooling2D(pool_size=(2, 2)),
+    layers.BatchNormalization(),
+    layers.Dropout(dropout_value),
 
     # flat layers
     layers.Flatten(),
-    layers.Dense(1152, activation='relu'),
-
-    layers.Dense(26*26, activation="relu"),
+    layers.Dense(256, activation='relu'),
     layers.Dropout(dropout_value),
 
-    layers.Dense(6, activation="softmax")
+    layers.Dense(128, activation="relu"),
+    layers.Dropout(dropout_value),
+
+    layers.Dense(3, activation="softmax")
 
 ])
 
