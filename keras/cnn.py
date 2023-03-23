@@ -2,9 +2,10 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from notify import send_message_over_text
-
+from sklearn.metrics import confusion_matrix
 from itertools import chain
 from keras import datasets, layers, models
+import numpy as np
 
 # remove the disgusted images, because honestly it's not enough data
 
@@ -33,17 +34,16 @@ testing_images = tf.keras.preprocessing.image_dataset_from_directory(
 )
 
 data_augmentation = tf.keras.Sequential([
-  layers.RandomFlip("horizontal_and_vertical"),
-  layers.RandomRotation(0.3),
+    layers.RandomFlip("horizontal_and_vertical"),
+    layers.RandomRotation(0.2),
 ])
 
 IMG_SIZE = 48
 
 resize_and_rescale = tf.keras.Sequential([
-  layers.Resizing(IMG_SIZE, IMG_SIZE),
-  layers.Rescaling(1./255)
+    layers.Resizing(IMG_SIZE, IMG_SIZE),
+    layers.Rescaling(1. / 255)
 ])
-
 
 my_callbacks = [
     tf.keras.callbacks.EarlyStopping(monitor="val_accuracy", patience=15),
@@ -52,9 +52,8 @@ my_callbacks = [
                                          patience=15, verbose=1)
 ]
 
-
 dropout_value = 0.25
-
+conv_layer_filter_count = 64
 
 # build the model
 model = models.Sequential([
@@ -63,123 +62,70 @@ model = models.Sequential([
     data_augmentation,  # twisting and scaling
 
     # first layer, look for features
-    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(48, 48, 1), strides=2),
+    layers.Conv2D(conv_layer_filter_count, (3, 3), activation='relu', input_shape=(48, 48, 1)),
     layers.MaxPooling2D(pool_size=(2, 2)),
     layers.BatchNormalization(),
     layers.Dropout(dropout_value),
 
     # second layer of feature extraction
-    layers.Conv2D(64, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.MaxPooling2D(pool_size=(2, 2)),
+    layers.Conv2D(conv_layer_filter_count, kernel_size=(3, 3), activation='relu', padding="same"),
     layers.BatchNormalization(),
     layers.Dropout(dropout_value),
 
     # third conv layer
-    layers.Conv2D(128, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.BatchNormalization(),
+    layers.Conv2D(conv_layer_filter_count, kernel_size=(3, 3), activation='relu', padding="same"),
     layers.Dropout(dropout_value),
 
-    # 4th layer
-    layers.Conv2D(256, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
 
-    # 5th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
 
-    # 6th layer
-    layers.Conv2D(1024, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
 
-    # 7th layer
-    layers.Conv2D(2048, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
 
-    # 8th layer
-    layers.Conv2D(1024, kernel_size=(4, 4), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 9th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 10th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 11th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 12th layer
-    layers.Conv2D(512, kernel_size=(4, 4), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 13th layer
-    layers.Conv2D(512, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 14th layer
-    layers.Conv2D(512, kernel_size=(4, 4), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 15th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 16th layer
-    layers.Conv2D(512, kernel_size=(3, 3), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 17th layer
-    layers.Conv2D(512, kernel_size=(2, 2), activation='relu', padding="same"),
-    layers.BatchNormalization(),
-    layers.Dropout(dropout_value),
-
-    # 18th layer
-    layers.Conv2D(128, kernel_size=(2, 2), activation='relu'),
+    # Final Conv Layer
+    layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
     layers.MaxPooling2D(pool_size=(2, 2), padding="same"),
     layers.BatchNormalization(),
     layers.Dropout(dropout_value),
 
     # flat layers
     layers.Flatten(),
-    layers.Dense(256, activation='relu'),
+    layers.Dense(2048, activation='relu'),
     layers.Dropout(dropout_value),
 
-    layers.Dense(128, activation="relu"),
-    layers.Dropout(dropout_value),
 
     layers.Dense(3, activation="softmax")
 
 ])
-
 
 model.compile(optimizer='adam',
               loss=keras.losses.SparseCategoricalCrossentropy(),
               metrics=['accuracy']
               )
 
+model.build(
+    input_shape=(None, 48, 48, 1)
+)
+print(model.summary())
+
+
 history = model.fit(train_images, epochs=250,
                     validation_data=testing_images,
                     callbacks=my_callbacks)
+
+
+history = model.fit(
+    train_images,
+    epochs=250,
+    validation_data=testing_images,
+    callbacks=my_callbacks,
+    workers=4)
 
 test_loss, test_acc = model.evaluate(testing_images, verbose=2)
 print(test_loss, test_acc)
 
 send_message_over_text(f'test loss:  {test_loss} \n{test_acc}')
 
-print(model.summary())
+y_pred = np.argmax(model.predict(testing_images), axis=-1)
+y_actual = y = np.concatenate([y for x, y in testing_images], axis=0)
+
+cm = confusion_matrix(y_actual, y_pred)
+print(cm)
