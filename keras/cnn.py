@@ -88,6 +88,14 @@ model = models.Sequential([
     layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
     layers.Dropout(dropout_value),
 
+    # seventh conv layer
+    layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
+    layers.Dropout(dropout_value),
+
+    # eighth conv layer
+    layers.Conv2D(conv_layer_filter_count, kernel_size=(2, 2), activation='relu'),
+    layers.Dropout(dropout_value),
+
     # Final Conv Layer
     layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
     layers.MaxPooling2D(pool_size=(2, 2), padding="same"),
@@ -115,9 +123,7 @@ model.build(
 print(model.summary())
 
 
-history = model.fit(train_images, epochs=250,
-                    validation_data=testing_images,
-                    callbacks=my_callbacks)
+
 
 
 history = model.fit(
