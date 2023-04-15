@@ -92,9 +92,6 @@ model = models.Sequential([
     layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
     layers.Dropout(dropout_value),
 
-    # eighth conv layer
-    layers.Conv2D(conv_layer_filter_count, kernel_size=(2, 2), activation='relu'),
-    layers.Dropout(dropout_value),
 
     # Final Conv Layer
     layers.Conv2D(conv_layer_filter_count, kernel_size=(4, 4), activation='relu'),
@@ -104,11 +101,9 @@ model = models.Sequential([
 
     # flat layers
     layers.Flatten(),
-    layers.Dense(2**13, activation='relu'),
+
+    layers.Dense(3, activation="softmax"),
     layers.Dropout(dropout_value),
-
-
-    layers.Dense(3, activation="softmax")
 
 ])
 
@@ -121,10 +116,6 @@ model.build(
     input_shape=(None, 48, 48, 1)
 )
 print(model.summary())
-
-
-
-
 
 history = model.fit(
     train_images,
