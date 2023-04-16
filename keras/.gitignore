@@ -1,3 +1,4 @@
 logs
 images
 example/notify.py
+*.h5
