@@ -8,9 +8,11 @@ BLUE = (255, 0, 0)
 GREEN = (0, 255, 0)
 RED = (0, 0, 255)
 
-with open("linear_regression.pkl", "rb") as file:
+with open("logistic_regression.pkl", "rb") as file:
     classifier = pickle.load(file)
-    print('linear  regression model loaded...')
+    print('Logistic regression model loaded...')
+
+
 
 def detect_smile(gray, x, y, w, h) -> bool:
     face = gray[y:y+h, x:x+w]
