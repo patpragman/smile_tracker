@@ -27,6 +27,7 @@ def detect_smile(gray, x, y, w, h) -> bool:
 def detect_all(gray, x, y, w, h) -> int:
     face = gray[y:y+h, x:x+w]
     face = cv2.resize(face, (48, 48), interpolation=cv2.INTER_AREA).reshape(-1, 1).T
+    # print(multi_class_classifier.predict_proba(face))
     return multi_class_classifier.predict(face)
 
 def binary_labeler(gray_scale_image, frame_to_edit, x, y, w, h) -> np.ndarray:
