@@ -10,11 +10,11 @@ BLUE = (255, 0, 0)
 GREEN = (0, 255, 0)
 RED = (0, 0, 255)
 
-with open("logistic_regression.pkl", "rb") as file:
+with open("logistic_regression_1.pkl", "rb") as file:
     binary_classifier = pickle.load(file)
     print('Logistic regression model (binary) loaded...')
 
-with open("logistic_regression_2.pkl", "rb") as file:
+with open("logistic_regression_0.pkl", "rb") as file:
     multi_class_classifier = pickle.load(file)
     print('Logistic regression model (multi-class) loaded...')
 
@@ -33,7 +33,8 @@ def detect_all(gray, x, y, w, h) -> int:
 def binary_labeler(gray_scale_image, frame_to_edit, x, y, w, h) -> np.ndarray:
     """detect only smile or no smile"""
 
-    if detect_smile(gray_scale_image, x, y, w, h):
+    # sometimes logistic regression gets it backwards - if it does, ... well, flip this around
+    if not detect_smile(gray_scale_image, x, y, w, h):
         cv2.putText(frame_to_edit, ':)', (x - 20, y), font, 1, GREEN, 2, cv2.LINE_AA)
         # draw a bounding box around the face
         cv2.rectangle(frame, (x, y), ((x + w), (y + h)), GREEN, 2)
@@ -49,24 +50,21 @@ def binary_labeler(gray_scale_image, frame_to_edit, x, y, w, h) -> np.ndarray:
 def multiclass_labeler(gray_scale_image, frame_to_edit, x, y, w, h) -> np.ndarray:
     """detect happy, sad, meh"""
 
-    if detect_all(gray_scale_image, x, y, w, h) == 1:
+    if detect_all(gray_scale_image, x, y, w, h) == 0:
         cv2.putText(frame_to_edit, ':)', (x - 20, y), font, 1, GREEN, 2, cv2.LINE_AA)
         # draw a bounding box around the face
-        cv2.rectangle(frame, (x, y), ((x + w), (y + h)), GREEN, 2)
+        cv2.rectangle(frame_to_edit, (x, y), ((x + w), (y + h)), GREEN, 2)
         cv2.imwrite("last_smile.png", frame_to_edit)
-    elif detect_all(gray_scale_image, x, y, w, h) == 0:
+    elif detect_all(gray_scale_image, x, y, w, h) == 1:
         cv2.putText(frame_to_edit, ':|', (x - 20, y), font, 1, BLUE, 2, cv2.LINE_AA)
         # draw a bounding box around the face
-        cv2.rectangle(frame, (x, y), ((x + w), (y + h)), BLUE, 2)
+        cv2.rectangle(frame_to_edit, (x, y), ((x + w), (y + h)), BLUE, 2)
         cv2.imwrite('last_meh.png', frame_to_edit)
     else:
         cv2.putText(frame_to_edit, ':(', (x - 20, y), font, 1, RED, 2, cv2.LINE_AA)
         # draw a bounding box around the face
-        cv2.rectangle(frame, (x, y), ((x + w), (y + h)), RED, 2)
+        cv2.rectangle(frame_to_edit, (x, y), ((x + w), (y + h)), RED, 2)
         cv2.imwrite('last_sad.png', frame_to_edit)
-
-    # draw a bounding box around the face
-    cv2.rectangle(frame, (x, y), ((x + w), (y + h)), BLUE, 2)
 
     return frame_to_edit
 
